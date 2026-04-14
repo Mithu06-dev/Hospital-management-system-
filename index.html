@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediCore HMS – Login</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="login-page">
+
+  <!-- ───────────────── LOGIN SCREEN ───────────────── -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-left">
+      <div class="brand-block">
+        <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+        <h1>MediCore<span>HMS</span></h1>
+        <p>Hospital Management System — built for speed, clarity, and care.</p>
+      </div>
+      <ul class="feature-list">
+        <li><i class="fa-solid fa-check-circle"></i> Patient records at a glance</li>
+        <li><i class="fa-solid fa-check-circle"></i> Doctor & department management</li>
+        <li><i class="fa-solid fa-check-circle"></i> Smart appointment scheduling</li>
+        <li><i class="fa-solid fa-check-circle"></i> Real-time dashboard analytics</li>
+      </ul>
+    </div>
+    <div class="login-right">
+      <div class="login-card">
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to your HMS account</p>
+        <div id="loginError" class="alert hidden"></div>
+        <div class="field">
+          <label>Username</label>
+          <div class="input-wrap"><i class="fa fa-user"></i>
+            <input type="text" id="username" placeholder="admin" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="input-wrap"><i class="fa fa-lock"></i>
+            <input type="password" id="password" placeholder="••••••••"/>
+          </div>
+        </div>
+        <button class="btn-primary full" onclick="login()">
+          <span>Sign In</span><i class="fa fa-arrow-right"></i>
+        </button>
+        <p class="hint">Demo credentials: <b>admin</b> / <b>admin123</b></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────── DASHBOARD SHELL ───────────────── -->
+  <div id="dashboardScreen" class="screen">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon sm"><i class="fa-solid fa-heart-pulse"></i></div>
+        <span>MediCore</span>
+      </div>
+      <nav>
+        <a href="#" class="nav-item active" onclick="showTab('dashboard',this)">
+          <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showTab('patients',this)">
+          <i class="fa-solid fa-hospital-user"></i><span>Patients</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showTab('doctors',this)">
+          <i class="fa-solid fa-user-doctor"></i><span>Doctors</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showTab('appointments',this)">
+          <i class="fa-solid fa-calendar-check"></i><span>Appointments</span>
+        </a>
+      </nav>
+      <button class="logout-btn" onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</button>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">Overview of your hospital today</p>
+        </div>
+        <div class="topbar-right">
+          <div class="avatar"><i class="fa fa-user-shield"></i></div>
+          <span id="loggedUser">Admin</span>
+        </div>
+      </header>
+
+      <!-- ── Dashboard Tab ── -->
+      <section id="tab-dashboard" class="tab-content active">
+        <div class="stat-grid">
+          <div class="stat-card teal">
+            <div class="stat-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div><p>Total Patients</p><h3 id="statPatients">0</h3></div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon"><i class="fa-solid fa-user-doctor"></i></div>
+            <div><p>Total Doctors</p><h3 id="statDoctors">0</h3></div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <div><p>Appointments</p><h3 id="statAppointments">0</h3></div>
+          </div>
+          <div class="stat-card rose">
+            <div class="stat-icon"><i class="fa-solid fa-stethoscope"></i></div>
+            <div><p>Today's Appointments</p><h3 id="statToday">0</h3></div>
+          </div>
+        </div>
+        <div class="recent-box">
+          <h3>Recent Appointments</h3>
+          <table class="data-table" id="recentTable">
+            <thead><tr><th>Date</th><th>Time</th><th>Patient</th><th>Doctor</th></tr></thead>
+            <tbody id="recentBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── Patients Tab ── -->
+      <section id="tab-patients" class="tab-content">
+        <div class="tab-actions">
+          <button class="btn-primary" onclick="openModal('patientModal')">
+            <i class="fa fa-plus"></i> Add Patient
+          </button>
+          <input type="text" class="search-input" placeholder="Search patients…" oninput="searchTable('patientBody',this.value)"/>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Name</th><th>Age</th><th>Disease</th><th>Mobile</th><th>Address</th><th>Actions</th></tr></thead>
+          <tbody id="patientBody"></tbody>
+        </table>
+      </section>
+
+      <!-- ── Doctors Tab ── -->
+      <section id="tab-doctors" class="tab-content">
+        <div class="tab-actions">
+          <button class="btn-primary" onclick="openModal('doctorModal')">
+            <i class="fa fa-plus"></i> Add Doctor
+          </button>
+          <input type="text" class="search-input" placeholder="Search doctors…" oninput="searchTable('doctorBody',this.value)"/>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Name</th><th>Age</th><th>Specialization</th><th>Experience (yrs)</th><th>Actions</th></tr></thead>
+          <tbody id="doctorBody"></tbody>
+        </table>
+      </section>
+
+      <!-- ── Appointments Tab ── -->
+      <section id="tab-appointments" class="tab-content">
+        <div class="tab-actions">
+          <button class="btn-primary" onclick="openModal('appointmentModal')">
+            <i class="fa fa-plus"></i> Book Appointment
+          </button>
+          <input type="text" class="search-input" placeholder="Search appointments…" oninput="searchTable('appointmentBody',this.value)"/>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Date</th><th>Time</th><th>Patient</th><th>Doctor</th><th>Actions</th></tr></thead>
+          <tbody id="appointmentBody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <!-- ───────── MODALS ───────── -->
+  <!-- Patient Modal -->
+  <div id="patientModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="patientModalTitle">Add Patient</h3>
+        <button onclick="closeModal('patientModal')"><i class="fa fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="patientId"/>
+        <div class="form-row">
+          <div class="field"><label>Full Name</label><input id="pName" placeholder="John Doe"/></div>
+          <div class="field"><label>Age</label><input id="pAge" type="number" placeholder="35"/></div>
+        </div>
+        <div class="field"><label>Disease / Condition</label><input id="pDisease" placeholder="Hypertension"/></div>
+        <div class="form-row">
+          <div class="field"><label>Mobile</label><input id="pMobile" placeholder="+91 9876543210"/></div>
+          <div class="field"><label>Address</label><input id="pAddress" placeholder="Chennai, Tamil Nadu"/></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('patientModal')">Cancel</button>
+        <button class="btn-primary" onclick="savePatient()">Save Patient</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doctor Modal -->
+  <div id="doctorModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="doctorModalTitle">Add Doctor</h3>
+        <button onclick="closeModal('doctorModal')"><i class="fa fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="doctorId"/>
+        <div class="form-row">
+          <div class="field"><label>Full Name</label><input id="dName" placeholder="Dr. Priya Sharma"/></div>
+          <div class="field"><label>Age</label><input id="dAge" type="number" placeholder="42"/></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Specialization</label><input id="dSpecial" placeholder="Cardiology"/></div>
+          <div class="field"><label>Experience (years)</label><input id="dExp" type="number" placeholder="10"/></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('doctorModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveDoctor()">Save Doctor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointment Modal -->
+  <div id="appointmentModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="apptModalTitle">Book Appointment</h3>
+        <button onclick="closeModal('appointmentModal')"><i class="fa fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="apptId"/>
+        <div class="form-row">
+          <div class="field"><label>Date</label><input id="aDate" type="date"/></div>
+          <div class="field"><label>Time</label><input id="aTime" type="time"/></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Patient Name</label>
+            <select id="aPatient"><option value="">-- Select Patient --</option></select>
+          </div>
+          <div class="field"><label>Doctor Name</label>
+            <select id="aDoctor"><option value="">-- Select Doctor --</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('appointmentModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveAppointment()">Book Appointment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
